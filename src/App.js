@@ -1,61 +1,8 @@
 import React, { Component } from 'react';
 import './App.css';
 import todoList from './todos.json';
-
-class TodoItem extends Component {
-  render(){
-    return (
-      <li className={this.props.value}>
-        <div className='view'>
-          <input
-            name={this.props.id} 
-            className='toggle' 
-            type='checkbox' 
-            checked={this.props.completed} 
-            onChange={this.props.toggleCheck}
-          />
-          <label>{this.props.title}</label>
-          <button 
-            className="destroy" 
-            name={this.props.id}
-            onClick={this.props.deleteOne}
-          />
-        </div>
-      </li>
-    );
-  }
-}
-
-class TodoList extends Component {
-  
-  render(){
-    return(
-      <ul className='todo-list'>
-        {this.props.todos.map( todo => {
-          if ( todo.completed ){
-            return(
-              <TodoItem 
-                value='completed' completed={todo.completed} 
-                title={todo.title} key={todo.id}
-                toggleCheck={this.props.toggleCheck}
-                id={todo.id} deleteOne={this.props.deleteOne}
-              />
-            )
-          }else{
-            return(
-              <TodoItem 
-                value='' completed={todo.completed} 
-                title={todo.title} key={todo.id}
-                toggleCheck={this.props.toggleCheck}
-                id={todo.id} deleteOne={this.props.deleteOne}
-             />
-            )
-          }
-        })}
-      </ul>
-    )
-  }
-}
+import { TodoList } from './TodoList';
+import { Link, Route, Switch } from 'react-router-dom'
 
 class App extends Component {
   state = {
@@ -98,6 +45,38 @@ class App extends Component {
     this.setState({todos: newTodos})
   }
 
+  allTodos = () => {
+    return (
+      <TodoList 
+        todos={this.state.todos}
+        toggleCheck={this.toggleCheck}
+        deleteOne={this.deleteOne}
+      />
+    )
+  }
+
+  activeTodos = () => {
+    let active = this.state.todos.filter( todo => todo.completed === false );
+    return (
+      <TodoList 
+        todos={active}
+        toggleCheck={this.toggleCheck}
+        deleteOne={this.deleteOne}
+      />
+    )
+  }
+
+  completedTodos = () => {
+    let completed = this.state.todos.filter( todo => todo.completed === true );
+    return (
+      <TodoList 
+        todos={completed}
+        toggleCheck={this.toggleCheck}
+        deleteOne={this.deleteOne}
+      />
+    )
+  }
+
   render() {
     return (
       <section className='todoapp'>
@@ -112,14 +91,31 @@ class App extends Component {
           />
         </header>
         <section className='main'>
-          <TodoList 
-            todos={this.state.todos}
-            toggleCheck={this.toggleCheck}
-            deleteOne={this.deleteOne}
-          />
+          <Switch>
+            <Route exact path='/' component={this.allTodos}/>
+            <Route path='/active' component={this.activeTodos}/>
+            <Route path='/completed' component={this.completedTodos}/>
+          </Switch>
         </section>
         <footer className="footer">
 				  <span className="todo-count"><strong>0</strong> item(s) left</span>
+          <ul className="filters">
+           <li>
+            <Link to="/">
+            All
+            </Link>
+           </li>
+           <li>
+            <Link to="/active">
+             Active
+            </Link>
+           </li>
+           <li>
+            <Link to="/completed">
+             Completed
+            </Link>
+           </li>
+          </ul>
 				  <button className="clear-completed" onClick={this.deleteAll}>Clear completed</button>
 			  </footer>
       </section>
